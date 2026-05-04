@@ -25,20 +25,21 @@ async fn main() -> anyhow::Result<()> {
         let exe = std::env::current_exe().ok();
         if let Some(exe_path) = exe {
             let path = exe_path.to_string_lossy();
+            let path_ref: &str = path.as_ref();
             #[cfg(target_os = "windows")]
             let _ = std::process::Command::new("cmd")
-                .args(["/c", "start", "", &path])
+                .args(["/c", "start", "", path_ref])
                 .spawn();
             #[cfg(target_os = "macos")]
             let _ = std::process::Command::new("open")
-                .args(["-a", "Terminal", &path])
+                .args(["-a", "Terminal", path_ref])
                 .spawn();
             #[cfg(target_os = "linux")]
             {
-                // Try common terminal emulators
                 let terms = ["x-terminal-emulator", "gnome-terminal", "konsole", "xfce4-terminal", "lxterminal", "xterm"];
+                let path_ref: &str = path.as_ref();
                 for term in &terms {
-                    if let Ok(_) = std::process::Command::new(term).arg("--").arg(&path).spawn() {
+                    if let Ok(_) = std::process::Command::new(term).arg("--").arg(path_ref).spawn() {
                         break;
                     }
                 }

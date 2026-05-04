@@ -26,13 +26,13 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - name: Build
-      run: cargo build --release --manifest-path subproject/penguin-downloader-tui/Cargo.toml
+      run: cargo build --release
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: penguin-downloader-tui-${{ runner.os }}
         path: |
-          subproject/penguin-downloader-tui/target/release/penguin-downloader-tui
-          subproject/penguin-downloader-tui/target/release/penguin-downloader-tui.exe
+          target/release/penguin-downloader-tui
+          target/release/penguin-downloader-tui.exe
         if-no-files-found: warn

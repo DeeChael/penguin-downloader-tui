@@ -1,0 +1,27 @@
+[package]
+name = "penguin-downloader-tui"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Terminal UI application for Penguin Downloader"
+
+[[bin]]
+name = "penguin-downloader-tui"
+path = "src/main.rs"
+
+[dependencies]
+penguin-downloader = "1.2.7"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "sync"] }
+ratatui = "0.29"
+crossterm = "0.28"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono = "0.4"
+directories = "5"
+unicode-width = "0.2"
+qrcode = "0.14"
+image = "0.25"

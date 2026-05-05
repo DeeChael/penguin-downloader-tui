@@ -106,10 +106,11 @@ jobs:
       run: |
         git clone https://github.com/ohos-rs/ohos-openssl.git /tmp/ohos-openssl
 
-    - name: Set OpenSSL dir for OHOS
+    - name: Set OpenSSL dir and static link for OHOS
       shell: bash
       run: |
         echo "AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_DIR=/tmp/ohos-openssl/prelude/arm64-v8a" >> $GITHUB_ENV
+        echo "OPENSSL_STATIC=1" >> $GITHUB_ENV
 
     - name: Build for OHOS
       run: cargo build --release --target aarch64-unknown-linux-ohos

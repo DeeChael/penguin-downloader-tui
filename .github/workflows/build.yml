@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  native:
     strategy:
       matrix:
         include:
@@ -41,4 +41,72 @@ jobs:
         path: |
           target/release/penguin-downloader-tui
           target/release/penguin-downloader-tui.exe
+        if-no-files-found: warn
+
+  ohos:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup OpenHarmony SDK
+      id: ohos
+      uses: openharmony-rs/setup-ohos-sdk@v1.0.0
+      with:
+        version: "6.1"
+
+    - name: Create compiler wrappers
+      shell: bash
+      run: |
+        SDK="${{ steps.ohos.outputs.ohos_sdk_native }}"
+        mkdir -p /tmp/ohos-tools
+
+        cat > /tmp/ohos-tools/aarch64-unknown-linux-ohos-clang.sh << SCRIPT
+        #!/bin/sh
+        exec "$SDK/llvm/bin/clang" \
+          -target aarch64-linux-ohos \
+          --sysroot="$SDK/sysroot" \
+          -D__MUSL__ \
+          "\$@"
+        SCRIPT
+
+        cat > /tmp/ohos-tools/aarch64-unknown-linux-ohos-clang++.sh << SCRIPT
+        #!/bin/sh
+        exec "$SDK/llvm/bin/clang++" \
+          -target aarch64-linux-ohos \
+          --sysroot="$SDK/sysroot" \
+          -D__MUSL__ \
+          "\$@"
+        SCRIPT
+
+        chmod +x /tmp/ohos-tools/aarch64-unknown-linux-ohos-clang.sh
+        chmod +x /tmp/ohos-tools/aarch64-unknown-linux-ohos-clang++.sh
+
+    - name: Install Rust with OHOS target
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: aarch64-unknown-linux-ohos
+
+    - name: Cache cargo dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Configure cargo for OHOS
+      shell: bash
+      run: |
+        SDK="${{ steps.ohos.outputs.ohos_sdk_native }}"
+        mkdir -p .cargo
+        cat > .cargo/config.toml << EOF
+        [target.aarch64-unknown-linux-ohos]
+        ar = "$SDK/llvm/bin/llvm-ar"
+        linker = "/tmp/ohos-tools/aarch64-unknown-linux-ohos-clang.sh"
+        EOF
+
+    - name: Build for OHOS
+      run: cargo build --release --target aarch64-unknown-linux-ohos
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: penguin-downloader-tui-aarch64-unknown-linux-ohos
+        path: target/aarch64-unknown-linux-ohos/release/penguin-downloader-tui
         if-no-files-found: warn
